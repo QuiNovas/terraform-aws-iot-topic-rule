@@ -1,7 +1,12 @@
-variable "name" {
-  description = "Name of the rule, used as prefix for other resources"
-  type        = string
-  default     = true
+variable "cloudwatch_alarm" {
+  description = "CW Alarm action"
+  type = list(object({
+    alarm_arn    = string
+    alarm_name   = string
+    state_reason = string
+    state_value  = string
+  }))
+  default = []
 }
 
 variable "description" {
@@ -16,15 +21,25 @@ variable "enabled" {
   default     = true
 }
 
-variable "sql_query" {
-  description = "The SQL statement used to query the topic"
-  type        = string
+variable "lambda" {
+  description = "Lambda action. List of function_names"
+  type        = list(string)
+  default     = []
 }
 
-variable "sql_version" {
-  description = "The version of the SQL rules engine to use when evaluating the rule"
+variable "name" {
+  description = "Name of the rule, used as prefix for other resources"
   type        = string
-  default     = "2016-03-23"
+  default     = true
+}
+
+variable "s3" {
+  description = "CW Alarm action"
+  type = list(object({
+    bucket_name = string
+    key         = string
+  }))
+  default = []
 }
 
 variable "sns" {
@@ -36,28 +51,13 @@ variable "sns" {
   default = []
 }
 
-variable "lambda" {
-  description = "Lambda action. List of function_names"
-  type        = list(string)
-  default     = []
+variable "sql_query" {
+  description = "The SQL statement used to query the topic"
+  type        = string
 }
 
-variable "cloudwatch_alarm" {
-  description = "CW Alarm action"
-  type = list(object({
-    alarm_arn    = string
-    alarm_name   = string
-    state_reason = string
-    state_value  = string
-  }))
-  default = []
-}
-
-variable "s3" {
-  description = "CW Alarm action"
-  type = list(object({
-    bucket_name    = string
-    key   = string
-  }))
-  default = []
+variable "sql_version" {
+  description = "The version of the SQL rules engine to use when evaluating the rule"
+  type        = string
+  default     = "2016-03-23"
 }
