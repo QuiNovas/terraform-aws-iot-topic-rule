@@ -5,6 +5,25 @@ resource "aws_iot_topic_rule" "rule" {
   sql         = var.sql_query
   sql_version = var.sql_version
 
+  dynamic "cloudwatch_alarm" {
+    for_each = var.cloudwatch_alarm
+
+    content {
+      alarm_name   = cloudwatch_alarm.value.alarm_name
+      role_arn     = aws_iam_role.iot_role.arn
+      state_reason = cloudwatch_alarm.value.state_reason
+      state_value  = cloudwatch_alarm.value.state_value
+    }
+  }
+
+  dynamic "lambda" {
+    for_each = data.aws_lambda_function.lambdas
+
+    content {
+      function_arn = lambda.value.arn
+    }
+  }
+
   dynamic "sns" {
     for_each = var.sns
 
@@ -15,11 +34,13 @@ resource "aws_iot_topic_rule" "rule" {
     }
   }
 
-  dynamic "lambda" {
-    for_each = data.aws_lambda_function.lambdas
+    dynamic "s3" {
+    for_each = var.s3
 
     content {
-      function_arn = lambda.value.arn #lambda.value.function_arn
+      bucket_name = s3.value.bucket_name
+	  key = s3.value.key
+      role_arn       = aws_iam_role.iot_role.arn
     }
   }
 }

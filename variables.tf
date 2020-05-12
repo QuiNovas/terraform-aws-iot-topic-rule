@@ -28,7 +28,7 @@ variable "sql_version" {
 }
 
 variable "sns" {
-  description = "SNS action, message_format, target_arn are supported arguments"
+  description = "SNS action. message_format, target_arn are supported arguments"
   type = list(object({
     message_format = string
     target_arn     = string
@@ -37,7 +37,27 @@ variable "sns" {
 }
 
 variable "lambda" {
-  description = "Lambda action, list of function_names"
+  description = "Lambda action. List of function_names"
   type        = list(string)
   default     = []
+}
+
+variable "cloudwatch_alarm" {
+  description = "CW Alarm action"
+  type = list(object({
+    alarm_arn    = string
+    alarm_name   = string
+    state_reason = string
+    state_value  = string
+  }))
+  default = []
+}
+
+variable "s3" {
+  description = "CW Alarm action"
+  type = list(object({
+    bucket_name    = string
+    key   = string
+  }))
+  default = []
 }
