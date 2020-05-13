@@ -72,7 +72,7 @@ data "aws_iam_policy_document" "cw_alarm" {
     actions = [
       "cloudwatch:SetAlarmState",
     ]
-    resources = var.cloudwatch_alarm.*.alarm_arn
+    resources = local.cloudwatch_alarm_arns
     sid       = "CWAlarmSetState"
   }
 }
@@ -112,5 +112,31 @@ resource "aws_iam_policy" "s3" {
 resource "aws_iam_role_policy_attachment" "s3" {
   count      = length(var.s3) != 0 ? 1 : 0
   policy_arn = aws_iam_policy.s3.0.arn
+  role       = aws_iam_role.iot_role.name
+}
+
+################################
+###  IAM for Dynamodb Action ###
+################################
+data "aws_iam_policy_document" "dynamodb" {
+  count = length(var.dynamodb) != 0 ? 1 : 0
+  statement {
+    actions = [
+      "dynamodb:PutItem",
+    ]
+    resources = local.dynamodb_arns
+    sid       = "PutItems"
+  }
+}
+
+resource "aws_iam_policy" "dynamodb" {
+  count  = length(var.dynamodb) != 0 ? 1 : 0
+  name   = "dynamodb"
+  policy = data.aws_iam_policy_document.dynamodb.0.json
+}
+
+resource "aws_iam_role_policy_attachment" "dynamodb" {
+  count      = length(var.dynamodb) != 0 ? 1 : 0
+  policy_arn = aws_iam_policy.dynamodb.0.arn
   role       = aws_iam_role.iot_role.name
 }

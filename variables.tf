@@ -1,7 +1,6 @@
 variable "cloudwatch_alarm" {
   description = "CW Alarm action"
   type = list(object({
-    alarm_arn    = string
     alarm_name   = string
     state_reason = string
     state_value  = string
@@ -13,6 +12,21 @@ variable "description" {
   description = "The description of the rule"
   type        = string
   default     = ""
+}
+
+variable "dynamodb" {
+  description = "CW Alarm action"
+  type = list(object({
+    hash_key_field  = string
+    hash_key_type   = string
+    hash_key_value  = string
+    payload_field   = string
+    range_key_field = string
+    range_key_type  = string
+    range_key_value = string
+    table_name      = string
+  }))
+  default = []
 }
 
 variable "enabled" {

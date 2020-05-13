@@ -12,6 +12,7 @@ s3
 sns
 
 ## Usage
+* Notifying SNS, Invoking Lambda, CW alarm actions
 
 ```hcl
 module "iot_rule" {
@@ -31,12 +32,31 @@ module "iot_rule" {
 
   cloudwatch_alarm = [
     {
-      alarm_name="test-iot-tf-module"
-      alarm_arn="arn:aws:cloudwatch:us-east-1:111222333444:alarm:my-alarm-1"
-      state_reason="iotRule1"
-      state_value="OK"
+      alarm_name   = "iot-alarm"
+      state_reason = "iotRule1"
+      state_value  = "OK"
     }
    ]
+}
+```
+* Inserting message to Dynamodb table
+```hcl
+module "iot_rule" {
+  name        = "iotTestRule"
+  description = "Rule created by TF module"
+  sql_query   = "select * from \"mytopic/test\""
+  source      = "Quinovas/terraform-aws-iot-topic-rule/aws"
+
+  dynamodb = [{
+    hash_key_field  = "message"
+    hash_key_type   = null
+    hash_key_value  = "$message"
+    payload_field   = "Payload"
+    range_key_field = null
+    range_key_type  = null
+    range_key_value = null
+    table_name      = "test-iot"
+  }]
 }
 ```
 
