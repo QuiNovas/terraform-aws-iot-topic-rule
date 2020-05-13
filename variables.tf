@@ -54,9 +54,8 @@ variable "message_data_logs" {
 }
 
 variable "name" {
-  description = "Name of the rule, used as prefix for other resources"
+  description = "Name of the rule, also used as prefix for other resources"
   type        = string
-  default     = true
 }
 
 variable "s3" {
