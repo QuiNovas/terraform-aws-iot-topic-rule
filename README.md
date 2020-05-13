@@ -11,9 +11,10 @@ Not all actions/errors are supported by [Terraform] (https://www.terraform.io/do
 * lambda
 * s3
 * sns
+* cloudwatch_logs (Only IAM and Log groups are created, Action is not yet supported)
 
 ## Usage
-* Notifying SNS, Invoking Lambda, CW alarm actions
+* Notifying SNSInvoking Lambda, CW alarm actions
 
 ```hcl
 module "iot_rule" {
@@ -50,7 +51,7 @@ module "iot_rule" {
 
   message_data_logs = true
   error_logs        = true
-  
+
   dynamodb = [{
     hash_key_field  = "message"
     hash_key_type   = null
