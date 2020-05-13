@@ -36,7 +36,7 @@ data "aws_iam_policy_document" "sns_publish" {
 
 resource "aws_iam_policy" "sns_publish" {
   count  = length(var.sns) != 0 ? 1 : 0
-  name   = "sns-publish"
+  name   = "${var.name}-sns-publish"
   policy = data.aws_iam_policy_document.sns_publish.0.json
 }
 
@@ -79,7 +79,7 @@ data "aws_iam_policy_document" "cw_alarm" {
 
 resource "aws_iam_policy" "cw_alarm" {
   count  = length(var.cloudwatch_alarm) != 0 ? 1 : 0
-  name   = "cw-alarm"
+  name   = "${var.name}-cw-alarm"
   policy = data.aws_iam_policy_document.cw_alarm.0.json
 }
 
@@ -105,7 +105,7 @@ data "aws_iam_policy_document" "s3" {
 
 resource "aws_iam_policy" "s3" {
   count  = length(var.s3) != 0 ? 1 : 0
-  name   = "s3"
+  name   = "${var.name}-s3"
   policy = data.aws_iam_policy_document.s3.0.json
 }
 
@@ -131,12 +131,40 @@ data "aws_iam_policy_document" "dynamodb" {
 
 resource "aws_iam_policy" "dynamodb" {
   count  = length(var.dynamodb) != 0 ? 1 : 0
-  name   = "dynamodb"
+  name   = "${var.name}-dynamodb"
   policy = data.aws_iam_policy_document.dynamodb.0.json
 }
 
 resource "aws_iam_role_policy_attachment" "dynamodb" {
   count      = length(var.dynamodb) != 0 ? 1 : 0
   policy_arn = aws_iam_policy.dynamodb.0.arn
+  role       = aws_iam_role.iot_role.name
+}
+
+#########################################
+###  Writing Error/Message logs to CW ###
+#########################################
+data "aws_iam_policy_document" "cloudwatch_logs" {
+  count = var.error_logs || var.message_data_logs ? 1 : 0
+  statement {
+    actions = [
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+    ]
+    resources = (var.error_logs && var.message_data_logs) ? [aws_cloudwatch_log_group.errors_log_group.0.arn,
+  aws_cloudwatch_log_group.message_data_log_group.0.arn] : (var.error_logs && !var.message_data_logs) ? [aws_cloudwatch_log_group.errors_log_group.0.arn] : [aws_cloudwatch_log_group.message_data_log_group.0.arn]
+    sid = "AllowErrorOrMessageLogWriting"
+  }
+}
+
+resource "aws_iam_policy" "cloudwatch_logs" {
+  count  = var.error_logs || var.message_data_logs ? 1 : 0
+  name   = "${var.name}-cloudwatch-logs"
+  policy = data.aws_iam_policy_document.cloudwatch_logs.0.json
+}
+
+resource "aws_iam_role_policy_attachment" "cloudwatch_logs" {
+  count      = var.error_logs || var.message_data_logs ? 1 : 0
+  policy_arn = aws_iam_policy.cloudwatch_logs.0.arn
   role       = aws_iam_role.iot_role.name
 }

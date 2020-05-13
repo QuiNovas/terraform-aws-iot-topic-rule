@@ -6,10 +6,11 @@ This module is used to create a aws iot rule with actions. It dynamically create
 Not all actions/errors are supported by [Terraform] (https://www.terraform.io/docs/providers/aws/r/iot_topic_rule.html) when this was written. 
 
 **Supported Actions**
-cloudwatch_alarm
-lambda
-s3
-sns
+* cloudwatch_alarm
+* dynamodb
+* lambda
+* s3
+* sns
 
 ## Usage
 * Notifying SNS, Invoking Lambda, CW alarm actions
@@ -39,7 +40,7 @@ module "iot_rule" {
    ]
 }
 ```
-* Inserting message to Dynamodb table
+* Inserting message data to Dynamodb table, Cloudwatch and writing Errors to Cloudwatch
 ```hcl
 module "iot_rule" {
   name        = "iotTestRule"
@@ -47,6 +48,9 @@ module "iot_rule" {
   sql_query   = "select * from \"mytopic/test\""
   source      = "Quinovas/terraform-aws-iot-topic-rule/aws"
 
+  message_data_logs = true
+  error_logs        = true
+  
   dynamodb = [{
     hash_key_field  = "message"
     hash_key_type   = null

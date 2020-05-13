@@ -63,3 +63,15 @@ resource "aws_iot_topic_rule" "rule" {
   sql_version = var.sql_version
 
 }
+
+resource "aws_cloudwatch_log_group" "errors_log_group" {
+  count             = var.error_logs ? 1 : 0
+  name              = "/aws/iot/rule/${var.name}/errors"
+  retention_in_days = 7
+}
+
+resource "aws_cloudwatch_log_group" "message_data_log_group" {
+  count             = var.message_data_logs ? 1 : 0
+  name              = "/aws/iot/rule/${var.name}/message-data"
+  retention_in_days = 7
+}

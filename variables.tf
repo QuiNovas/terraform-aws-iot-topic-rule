@@ -35,10 +35,22 @@ variable "enabled" {
   default     = true
 }
 
+variable "error_logs" {
+  description = "Enable logging of errors to Cloudwatch"
+  type        = string
+  default     = true
+}
+
 variable "lambda" {
   description = "Lambda action. List of function_names"
   type        = list(string)
   default     = []
+}
+
+variable "message_data_logs" {
+  description = "write message data to Cloudwatch"
+  type        = string
+  default     = false
 }
 
 variable "name" {
