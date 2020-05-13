@@ -1,7 +1,6 @@
 variable "cloudwatch_alarm" {
   description = "CW Alarm action"
   type = list(object({
-    alarm_arn    = string
     alarm_name   = string
     state_reason = string
     state_value  = string
@@ -15,8 +14,29 @@ variable "description" {
   default     = ""
 }
 
+variable "dynamodb" {
+  description = "CW Alarm action"
+  type = list(object({
+    hash_key_field  = string
+    hash_key_type   = string
+    hash_key_value  = string
+    payload_field   = string
+    range_key_field = string
+    range_key_type  = string
+    range_key_value = string
+    table_name      = string
+  }))
+  default = []
+}
+
 variable "enabled" {
   description = "Specifies whether the rule is enabled"
+  type        = string
+  default     = true
+}
+
+variable "error_logs" {
+  description = "Enable logging of errors to Cloudwatch"
   type        = string
   default     = true
 }
@@ -25,6 +45,12 @@ variable "lambda" {
   description = "Lambda action. List of function_names"
   type        = list(string)
   default     = []
+}
+
+variable "message_data_logs" {
+  description = "write message data to Cloudwatch"
+  type        = string
+  default     = false
 }
 
 variable "name" {
