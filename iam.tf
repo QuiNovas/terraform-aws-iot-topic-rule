@@ -160,7 +160,7 @@ data "aws_iam_policy_document" "elasticsearch" {
     ]
     resources = ["arn:aws:es:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:domain/*",
     ]
-    sid = "service"
+    sid = "ElasticPut"
   }
 }
 
@@ -247,7 +247,7 @@ data "aws_iam_policy_document" "sqs" {
     ]
     resources = ["arn:aws:sqs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:*",
     ]
-    sid = "Service"
+    sid = "SqsSend"
   }
 }
 
@@ -276,7 +276,7 @@ data "aws_iam_policy_document" "kinesis" {
       "kinesis:PutRecord",
     ]
     resources = local.kinesis_arns
-    sid       = "Service"
+    sid       = "KinesisPut"
   }
 }
 
@@ -304,7 +304,7 @@ data "aws_iam_policy_document" "firehose" {
       "firehose:PutRecord",
     ]
     resources = local.firehose_arns
-    sid       = "Service"
+    sid       = "FirehosePut"
   }
 }
 
@@ -332,7 +332,7 @@ data "aws_iam_policy_document" "republish" {
       "iot:Publish",
     ]
     resources = local.republish_arns
-    sid = "Service"
+    sid = "IotPublish"
   }
 }
 
