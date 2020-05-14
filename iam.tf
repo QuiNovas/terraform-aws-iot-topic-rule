@@ -89,31 +89,38 @@ resource "aws_iam_role_policy_attachment" "cw_alarm" {
   role       = aws_iam_role.iot_role.name
 }
 
-##########################
-###  IAM for S3 Action ###
-##########################
-data "aws_iam_policy_document" "s3" {
-  count = length(var.s3) != 0 ? 1 : 0
+
+
+################################
+###  IAM for CW Metric Action ###
+################################
+data "aws_iam_policy_document" "cw_metric" {
+  count = length(var.cloudwatch_metric) != 0 ? 1 : 0
   statement {
     actions = [
-      "s3:PutObject",
+      "cloudwatch:PutMetricData",
     ]
-    resources = local.s3_bucket_arns
-    sid       = "S3PutObject"
+    resources = [
+      "*",
+    ]
+    sid = "CWMetric"
   }
 }
 
-resource "aws_iam_policy" "s3" {
-  count  = length(var.s3) != 0 ? 1 : 0
-  name   = "${var.name}-s3"
-  policy = data.aws_iam_policy_document.s3.0.json
+resource "aws_iam_policy" "cw_metric" {
+  count  = length(var.cloudwatch_metric) != 0 ? 1 : 0
+  name   = "${var.name}-cw-metric"
+  policy = data.aws_iam_policy_document.cw_metric.0.json
 }
 
-resource "aws_iam_role_policy_attachment" "s3" {
-  count      = length(var.s3) != 0 ? 1 : 0
-  policy_arn = aws_iam_policy.s3.0.arn
+resource "aws_iam_role_policy_attachment" "cw_metric" {
+  count      = length(var.cloudwatch_metric) != 0 ? 1 : 0
+  policy_arn = aws_iam_policy.cw_metric.0.arn
   role       = aws_iam_role.iot_role.name
 }
+
+
+
 
 ################################
 ###  IAM for Dynamodb Action ###
@@ -141,6 +148,35 @@ resource "aws_iam_role_policy_attachment" "dynamodb" {
   role       = aws_iam_role.iot_role.name
 }
 
+
+#####################################
+###  IAM for elasticsearch Action ###
+#####################################
+data "aws_iam_policy_document" "elasticsearch" {
+  count = length(var.elasticsearch) != 0 ? 1 : 0
+  statement {
+    actions = [
+      "es:ESHttpPut",
+    ]
+    resources = ["arn:aws:es:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:domain/*",
+    ]
+    sid = "service"
+  }
+}
+
+resource "aws_iam_policy" "elasticsearch" {
+  count  = length(var.elasticsearch) != 0 ? 1 : 0
+  name   = "${var.name}-elasticsearch"
+  policy = data.aws_iam_policy_document.elasticsearch.0.json
+}
+
+resource "aws_iam_role_policy_attachment" "elasticsearch" {
+  count      = length(var.elasticsearch) != 0 ? 1 : 0
+  policy_arn = aws_iam_policy.elasticsearch.0.arn
+  role       = aws_iam_role.iot_role.name
+}
+
+
 #########################################
 ###  Writing Error/Message logs to CW ###
 #########################################
@@ -152,7 +188,7 @@ data "aws_iam_policy_document" "cloudwatch_logs" {
       "logs:PutLogEvents",
     ]
     resources = (var.error_logs && var.message_data_logs) ? [aws_cloudwatch_log_group.errors_log_group.0.arn,
-  aws_cloudwatch_log_group.message_data_log_group.0.arn] : (var.error_logs && !var.message_data_logs) ? [aws_cloudwatch_log_group.errors_log_group.0.arn] : [aws_cloudwatch_log_group.message_data_log_group.0.arn]
+    aws_cloudwatch_log_group.message_data_log_group.0.arn] : (var.error_logs && ! var.message_data_logs) ? [aws_cloudwatch_log_group.errors_log_group.0.arn] : [aws_cloudwatch_log_group.message_data_log_group.0.arn]
     sid = "AllowErrorOrMessageLogWriting"
   }
 }
@@ -166,5 +202,149 @@ resource "aws_iam_policy" "cloudwatch_logs" {
 resource "aws_iam_role_policy_attachment" "cloudwatch_logs" {
   count      = var.error_logs || var.message_data_logs ? 1 : 0
   policy_arn = aws_iam_policy.cloudwatch_logs.0.arn
+  role       = aws_iam_role.iot_role.name
+}
+
+
+
+##########################
+###  IAM for S3 Action ###
+##########################
+data "aws_iam_policy_document" "s3" {
+  count = length(var.s3) != 0 ? 1 : 0
+  statement {
+    actions = [
+      "s3:PutObject",
+    ]
+    resources = local.s3_bucket_arns
+    sid       = "S3PutObject"
+  }
+}
+
+resource "aws_iam_policy" "s3" {
+  count  = length(var.s3) != 0 ? 1 : 0
+  name   = "${var.name}-s3"
+  policy = data.aws_iam_policy_document.s3.0.json
+}
+
+resource "aws_iam_role_policy_attachment" "s3" {
+  count      = length(var.s3) != 0 ? 1 : 0
+  policy_arn = aws_iam_policy.s3.0.arn
+  role       = aws_iam_role.iot_role.name
+}
+
+
+
+###############################################
+###  Permissions for sqs  Actions #############
+###############################################
+
+data "aws_iam_policy_document" "sqs" {
+  count = length(var.sqs) != 0 ? 1 : 0
+  statement {
+    actions = [
+      "sqs:SendMessage",
+    ]
+    resources = ["arn:aws:sqs:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:*",
+    ]
+    sid = "Service"
+  }
+}
+
+resource "aws_iam_policy" "sqs" {
+  count  = length(var.sqs) != 0 ? 1 : 0
+  name   = "${var.name}-sqs-sendmessage"
+  policy = data.aws_iam_policy_document.sqs.0.json
+}
+
+resource "aws_iam_role_policy_attachment" "sqs" {
+  count      = length(var.sqs) != 0 ? 1 : 0
+  policy_arn = aws_iam_policy.sqs.0.arn
+  role       = aws_iam_role.iot_role.name
+}
+
+
+
+###############################################
+###  Permissions for kinesis  Actions #############
+###############################################
+
+data "aws_iam_policy_document" "kinesis" {
+  count = length(var.kinesis) != 0 ? 1 : 0
+  statement {
+    actions = [
+      "kinesis:PutRecord",
+    ]
+    resources = local.kinesis_arns
+    sid       = "Service"
+  }
+}
+
+resource "aws_iam_policy" "kinesis" {
+  count  = length(var.kinesis) != 0 ? 1 : 0
+  name   = "${var.name}-kinesis-put"
+  policy = data.aws_iam_policy_document.kinesis.0.json
+}
+
+resource "aws_iam_role_policy_attachment" "kinesis" {
+  count      = length(var.kinesis) != 0 ? 1 : 0
+  policy_arn = aws_iam_policy.kinesis.0.arn
+  role       = aws_iam_role.iot_role.name
+}
+
+
+###############################################
+###  Permissions for firehose  Actions #############
+###############################################
+
+data "aws_iam_policy_document" "firehose" {
+  count = length(var.firehose) != 0 ? 1 : 0
+  statement {
+    actions = [
+      "firehose:PutRecord",
+    ]
+    resources = local.firehose_arns
+    sid       = "Service"
+  }
+}
+
+resource "aws_iam_policy" "firehose" {
+  count  = length(var.firehose) != 0 ? 1 : 0
+  name   = "${var.name}-firehose-put-record"
+  policy = data.aws_iam_policy_document.firehose.0.json
+}
+
+resource "aws_iam_role_policy_attachment" "firehose" {
+  count      = length(var.firehose) != 0 ? 1 : 0
+  policy_arn = aws_iam_policy.firehose.0.arn
+  role       = aws_iam_role.iot_role.name
+}
+
+
+#####################################################
+###  Permissions for republish  Actions #############
+#####################################################
+
+data "aws_iam_policy_document" "republish" {
+  count = length(var.republish) != 0 ? 1 : 0
+  statement {
+    actions = [
+      "iot:Publish",
+    ]
+    resources = ["arn:aws:iot:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:topic/*",
+    ]
+    sid = "Service"
+  }
+}
+
+resource "aws_iam_policy" "republish" {
+  count  = length(var.republish) != 0 ? 1 : 0
+  name   = "${var.name}-iot-republish"
+  policy = data.aws_iam_policy_document.republish.0.json
+}
+
+resource "aws_iam_role_policy_attachment" "republish" {
+  count      = length(var.republish) != 0 ? 1 : 0
+  policy_arn = aws_iam_policy.republish.0.arn
   role       = aws_iam_role.iot_role.name
 }
