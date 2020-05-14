@@ -331,8 +331,7 @@ data "aws_iam_policy_document" "republish" {
     actions = [
       "iot:Publish",
     ]
-    resources = ["arn:aws:iot:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:topic/*",
-    ]
+    resources = local.republish_arns
     sid = "Service"
   }
 }
