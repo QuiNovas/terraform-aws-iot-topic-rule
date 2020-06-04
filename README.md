@@ -7,8 +7,13 @@ Not all actions/errors are supported by [Terraform] (https://www.terraform.io/do
 
 **Supported Actions**
 * cloudwatch_alarm
+* cloudwatch_metric
 * dynamodb
+* elasticsearch
+* firehose
+* kinesis
 * lambda
+* republish
 * s3
 * sns
 * cloudwatch_logs (Only IAM and Log groups are created, Action is not yet supported)
@@ -61,6 +66,44 @@ module "iot_rule" {
     range_key_type  = null
     range_key_value = null
     table_name      = "test-iot"
+  }]
+}
+```
+*  CW metric,elasticsearch,firehose,kinesis and republish actions
+```hcl
+module "iot_rule" {
+  name        = "iotTestRule"
+  description = "Rule created by TF module"
+  sql_query   = "select * from \"mytopic/test\""
+  source      = "Quinovas/terraform-aws-iot-topic-rule/aws"
+
+  cloudwatch_metric = [{
+      metric_name      = "Buffers"
+      metric_namespace = "TestNamespace"
+      metric_timestamp = null
+      metric_unit      = "Bytes"
+      metric_value     = 231434333
+  }]
+
+  elasticsearch = [{
+    endpoint     = "https://test-wxzt4lsonb6xw26r6g56q.us-east-1.es.amazonaws.com"  #url of the elasticsearch
+    id           = "IotTest"
+    index        = "abc"
+    type         = "def"
+  }]
+
+  firehose = [{
+    delivery_stream_name = "test-firehose"
+    separator = null
+  }]
+
+  kinesis = [{
+    partition_key = null
+    stream_name = "test-kinesis"
+  }]
+
+  republish =[{
+    topic = "abcd"
   }]
 }
 ```
