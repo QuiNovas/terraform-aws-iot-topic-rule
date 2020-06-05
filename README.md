@@ -7,8 +7,13 @@ Not all actions/errors are supported by [Terraform] (https://www.terraform.io/do
 
 **Supported Actions**
 * cloudwatch_alarm
+* cloudwatch_metric
 * dynamodb
+* elasticsearch
+* firehose
+* kinesis
 * lambda
+* republish
 * s3
 * sns
 * cloudwatch_logs (Only IAM and Log groups are created, Action is not yet supported)
