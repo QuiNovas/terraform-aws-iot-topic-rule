@@ -10,6 +10,20 @@ resource "aws_iot_topic_rule" "rule" {
     }
   }
 
+
+  dynamic "cloudwatch_metric" {
+    for_each = var.cloudwatch_metric
+
+    content {
+      metric_name      = cloudwatch_metric.value.metric_name
+      role_arn         = aws_iam_role.iot_role.arn
+      metric_namespace = cloudwatch_metric.value.metric_namespace
+      metric_timestamp = lookup(cloudwatch_metric.value, "metric_timestamp", null)
+      metric_unit      = cloudwatch_metric.value.metric_unit
+      metric_value     = cloudwatch_metric.value.metric_value
+    }
+  }
+
   description = var.description
 
   dynamic "dynamodb" {
@@ -28,7 +42,41 @@ resource "aws_iot_topic_rule" "rule" {
     }
   }
 
+
+  dynamic "elasticsearch" {
+    for_each = var.elasticsearch
+
+    content {
+      endpoint = elasticsearch.value.endpoint
+      role_arn = aws_iam_role.iot_role.arn
+      id       = elasticsearch.value.id
+      index    = elasticsearch.value.index
+      type     = elasticsearch.value.type
+    }
+  }
+
   enabled = var.enabled
+
+
+  dynamic "firehose" {
+    for_each = var.firehose
+
+    content {
+      delivery_stream_name = firehose.value.delivery_stream_name
+      role_arn             = aws_iam_role.iot_role.arn
+      separator            = lookup(firehose.value, "separator", null)
+    }
+  }
+
+  dynamic "kinesis" {
+    for_each = var.kinesis
+
+    content {
+      partition_key = lookup(kinesis.value, "partition_key", null)
+      role_arn      = aws_iam_role.iot_role.arn
+      stream_name   = kinesis.value.stream_name
+    }
+  }
 
   dynamic "lambda" {
     for_each = data.aws_lambda_function.lambdas
@@ -39,6 +87,15 @@ resource "aws_iot_topic_rule" "rule" {
   }
 
   name = var.name
+
+  dynamic "republish" {
+    for_each = var.republish
+
+    content {
+      topic    = republish.value.topic
+      role_arn = aws_iam_role.iot_role.arn
+    }
+  }
 
   dynamic "s3" {
     for_each = var.s3
@@ -61,6 +118,17 @@ resource "aws_iot_topic_rule" "rule" {
 
   sql         = var.sql_query
   sql_version = var.sql_version
+
+
+  dynamic "sqs" {
+    for_each = var.sqs
+
+    content {
+      queue_url  = sqs.value.queue_url
+      role_arn   = aws_iam_role.iot_role.arn
+      use_base64 = sqs.value.use_base64
+    }
+  }
 
 }
 
