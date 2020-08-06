@@ -187,8 +187,8 @@ data "aws_iam_policy_document" "cloudwatch_logs" {
       "logs:CreateLogStream",
       "logs:PutLogEvents",
     ]
-    resources = (var.error_logs && var.message_data_logs) ? [aws_cloudwatch_log_group.errors_log_group.0.arn,
-    aws_cloudwatch_log_group.message_data_log_group.0.arn] : (var.error_logs && ! var.message_data_logs) ? [aws_cloudwatch_log_group.errors_log_group.0.arn] : [aws_cloudwatch_log_group.message_data_log_group.0.arn]
+    resources = (var.error_logs && var.message_data_logs) ? ["${aws_cloudwatch_log_group.errors_log_group.0.arn}:*",
+    "${aws_cloudwatch_log_group.message_data_log_group.0.arn}:*"] : (var.error_logs && ! var.message_data_logs) ? ["${aws_cloudwatch_log_group.errors_log_group.0.arn}:*"] : ["${aws_cloudwatch_log_group.message_data_log_group.0.arn}:*"]
     sid = "AllowErrorOrMessageLogWriting"
   }
 }
