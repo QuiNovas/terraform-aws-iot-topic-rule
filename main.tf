@@ -1,4 +1,5 @@
 resource "aws_iot_topic_rule" "rule" {
+  depends_on = [aws_iam_role.iot_role]
   dynamic "cloudwatch_alarm" {
     for_each = var.cloudwatch_alarm
 
