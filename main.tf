@@ -1,5 +1,6 @@
 resource "aws_iot_topic_rule" "rule" {
-  depends_on = [aws_iam_role.iot_role, aws_iam_policy.republish]
+
+  depends_on = [aws_iam_role.iot_role, aws_iam_policy.republish, aws_iam_role_policy_attachment.republish]
 
   dynamic "cloudwatch_alarm" {
     for_each = var.cloudwatch_alarm
