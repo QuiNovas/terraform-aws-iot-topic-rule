@@ -18,6 +18,12 @@ data "aws_iam_policy_document" "iot_assume_role" {
 resource "aws_iam_role" "iot_role" {
   name               = "${var.name}-iot-role"
   assume_role_policy = data.aws_iam_policy_document.iot_assume_role.json
+
+  # AWS returns success for IAM change but change is not yet available for a few seconds. Sleep to miss the race condition failure.
+  provisioner "local-exec" {
+    interpreter = ["bash", "-c"]
+    command = "sleep 30"
+  }
 }
 
 ############################
